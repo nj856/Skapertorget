@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Om oss — SkaperTorget</title>
+  <script>
+    // Sjekk innlogging FØR siden lastes — send til hovedsiden hvis ikke innlogget
+    if (localStorage.getItem('st_innlogget') !== '1') {
+      window.location.href = 'Gruppe9_Skapertorget.html';
+    }
+  </script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* --- HEADER --- */
+    .site-header { background: #111; }
+    .header-top {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .logo small { display: block; font-size: 11px; font-weight: 400; color: #888; }
+    .header-nav { display: flex; gap: 4px; }
+    .header-nav a {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 12px;
+      border-radius: 4px;
+    }
+    .header-nav a:hover { background: #222; color: #fff; }
+    .header-nav a.active { background: #333; color: #fff; font-weight: 700; }
+
+    /* --- HERO --- */
+    .hero {
+      background: #111;
+      color: #fff;
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .hero-label {
+      display: inline-block;
+      background: #222;
+      border: 1px solid #444;
+      color: #aaa;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .hero h1 em { font-style: italic; color: #aaa; }
+    .hero p { font-size: 1rem; color: #888; max-width: 520px; margin: 0 auto 32px; }
+    .hero-stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .hero-stat .num { display: block; font-size: 2rem; font-weight: 900; }
+    .hero-stat .lbl { font-size: 12px; color: #666; }
+
+    /* --- INNHOLD --- */
+    .content-wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* --- AVSNITT-LABEL --- */
+    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+
+    /* --- STORY --- */
+    .story-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 72px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    @media(max-width:700px){ .story-section { grid-template-columns:1fr; gap:32px; padding:48px 0; } }
+    .story-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+    .story-section p { color: #444; margin-bottom: 14px; line-height: 1.75; }
+    .story-visual {
+      background: #eee;
+      border-radius: 8px;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+    }
+
+    /* --- VERDIER --- */
+    .verdier-section { padding: 72px 0; border-bottom: 1px solid #ddd; text-align: center; }
+    .verdier-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 900; margin-bottom: 40px; }
+    .verdier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .verdi-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 28px 24px;
+      text-align: left;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .verdi-card:hover { border-color: #111; transform: translateY(-2px); }
+    .verdi-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .verdi-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .verdi-card p  { font-size: 13px; color: #666; line-height: 1.6; }
+
+    /* --- TIDSLINJE --- */
+    .timeline-section { padding: 72px 0; border-bottom: 1px solid #ddd; }
+    .timeline-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 900; margin-bottom: 40px; text-align: center; }
+    .timeline { position: relative; max-width: 640px; margin: 0 auto; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0; bottom: 0;
+      width: 1px;
+      background: #ddd;
+    }
+    @media(max-width:560px){ .timeline::before { left: 16px; transform: none; } }
+
+    .tl-item {
+      display: flex;
+      justify-content: flex-end;
+      padding-right: calc(50% + 24px);
+      margin-bottom: 32px;
+      position: relative;
+    }
+    .tl-item:nth-child(even) {
+      justify-content: flex-start;
+      padding-right: 0;
+      padding-left: calc(50% + 24px);
+    }
+    @media(max-width:560px){
+      .tl-item, .tl-item:nth-child(even) { justify-content: flex-start; padding-right: 0; padding-left: 44px; }
+    }
+    .tl-dot {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      top: 8px;
+      width: 12px; height: 12px;
+      background: #111;
+      border-radius: 50%;
+      border: 3px solid #f5f5f5;
+      box-shadow: 0 0 0 1px #ccc;
+    }
+    @media(max-width:560px){ .tl-dot { left: 16px; transform: translateX(-50%); } }
+    .tl-card { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 14px 18px; max-width: 240px; }
+    .tl-year  { font-size: 10px; font-weight: 700; color: #666; letter-spacing: 1px; margin-bottom: 3px; text-transform: uppercase; }
+    .tl-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+    .tl-text  { font-size: 12px; color: #666; line-height: 1.5; }
+
+    /* --- TEAM --- */
+    .team-section { padding: 72px 0; border-bottom: 1px solid #ddd; }
+    .team-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.4rem); font-weight: 900; margin-bottom: 8px; text-align: center; }
+    .team-section > p { text-align: center; color: #666; max-width: 480px; margin: 0 auto 40px; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 16px; }
+    .team-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 24px 16px;
+      text-align: center;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .team-card:hover { border-color: #111; transform: translateY(-2px); }
+    .team-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 900; color: #fff;
+      background: #111;
+    }
+    .team-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+    .team-role { font-size: 12px; color: #666; }
+    .team-tag {
+      display: inline-block;
+      background: #eee;
+      color: #333;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-top: 6px;
+    }
+
+    /* --- CTA --- */
+    .cta-section { padding: 72px 0 0; }
+    .cta-box {
+      background: #111;
+      border-radius: 4px;
+      padding: 56px 40px;
+      color: #fff;
+      text-align: center;
+    }
+    .cta-box h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; margin-bottom: 12px; }
+    .cta-box p { color: #888; max-width: 440px; margin: 0 auto 28px; }
+    .cta-btns { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .btn-main {
+      background: #fff; color: #111;
+      border: none; padding: 11px 24px;
+      border-radius: 4px; font-size: 14px; font-weight: 700;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .btn-main:hover { background: #eee; }
+    .btn-sec {
+      background: transparent; color: #fff;
+      border: 1px solid #444; padding: 11px 24px;
+      border-radius: 4px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+    }
+    .btn-sec:hover { background: #222; }
+
+    /* --- FOOTER --- */
+    footer { background: #111; color: #555; text-align: center; padding: 24px; font-size: 12px; }
+    footer a { color: #777; }
+
+    /* --- ANIMASJON --- */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-top">
+    <a href="Gruppe9_Skapertorget.html" class="logo">
+      SkaperTorget <small>Norske skapere — norske kjøpere</small>
+    </a>
+    <nav class="header-nav">
+      <a href="Gruppe9_Skapertorget.html">Hjem</a>
+      <a href="Gruppe9_Skapertorget.html">Produkter</a>
+      <a href="#" class="active">Om oss</a>
+      <a href="Gruppe9_Skapertorget.html" onclick="localStorage.setItem('goto','kontakt')">Kontakt oss</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-label">Vår historie</div>
+  <h1>Vi tror på norsk<br><em>håndverk og skaperglede</em></h1>
+  <p>SkaperTorget er mer enn en markedsplass — det er et fellesskap for alle som lager noe med hendene, hjertet og hodet.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">6</span><span class="lbl">API-er</span></div>
+    <div style="width:1px;height:36px;background:#333;align-self:center"></div>
+    <div class="hero-stat"><span class="num">100%</span><span class="lbl">Norsk</span></div>
+    <div style="width:1px;height:36px;background:#333;align-self:center"></div>
+    <div class="hero-stat"><span class="num">2026</span><span class="lbl">Startet</span></div>
+  </div>
+</section>
+
+<div class="content-wrap">
+
+  
+  <section class="story-section fade-in">
+    <div>
+      <p class="section-label">Historien vår</p>
+      <h2>Skapt av studenter, for skapere</h2>
+      <p>SkaperTorget ble til som et skoleprosjekt med én stor tanke: hva om norske håndverkere og kreative sjeler hadde sin egen, dedikerte markedsplass?</p>
+      <p>Vi så et gap i markedet. Store plattformer er upersonlige og internasjonale. Vi ville lage noe nærmere, varmere og mer norsk — en plass der du faktisk kan møte den som lagde varen du kjøper.</p>
+      <p>Prosjektet er utviklet av et dedikert team, der hver person har bidratt med sitt eget API og sin del av systemet. Sammen har vi bygget noe vi er stolte av.</p>
+    </div>
+    <div class="story-visual"></div>
+  </section>
+
+  
+  <section class="verdier-section fade-in">
+    <p class="section-label">Det vi tror på</p>
+    <h2>Våre verdier</h2>
+    <div class="verdier-grid">
+      <div class="verdi-card">
+        <span class="verdi-icon"></span>
+        <h3>Direkte forbindelser</h3>
+        <p>Vi fjerner mellomleddene. Kjøper møter selger, og penger går rett til den som fortjener dem — skaperen.</p>
+      </div>
+      <div class="verdi-card">
+        <span class="verdi-icon"></span>
+        <h3>Bærekraft</h3>
+        <p>Brukte og håndlagde klær er bedre for planeten. Vi heier på de som velger kvalitet fremfor rask mote.</p>
+      </div>
+      <div class="verdi-card">
+        <span class="verdi-icon"></span>
+        <h3>Trygg handel</h3>
+        <p>Med Stripe-betaling og et eget hjelpesystem er du alltid ivaretatt, enten du kjøper eller selger.</p>
+      </div>
+      <div class="verdi-card">
+        <span class="verdi-icon"></span>
+        <h3>Norsk fellesskap</h3>
+        <p>Vi er bygget i Norge, for norske skapere. Plattformen er på norsk og rettet mot det norske markedet.</p>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="timeline-section fade-in">
+    <p class="section-label" style="text-align:center">Veien hit</p>
+    <h2>Slik ble SkaperTorget til</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-year">Januar 2026</div>
+          <div class="tl-title">Idéen fødes</div>
+          <div class="tl-text">Teamet starter arbeidet med å designe en norsk markedsplass for håndlagde produkter.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-year">Februar 2026</div>
+          <div class="tl-title">API-utvikling</div>
+          <div class="tl-text">Hvert gruppemedlem utvikler sitt eget REST API — fra produkter og chat til betaling og hjelp.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-year">Mars 2026</div>
+          <div class="tl-title">Frontend bygges</div>
+          <div class="tl-text">React og Django kobles sammen til én sammenhengende plattform med ekte Stripe-betaling.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-year">Mai 2026</div>
+          <div class="tl-title">Lansering </div>
+          <div class="tl-text">SkaperTorget er klart — en komplett markedsplass bygget fra bunnen av.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="team-section fade-in">
+    <p class="section-label" style="text-align:center">Møt teamet</p>
+    <h2>Teamet bak</h2>
+    <p>Et team av utviklere, der hver person har bygget sin egen del av plattformen.</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar" style="background:#222"></div>
+        <div class="team-name">Produktansvarlig</div>
+        <div class="team-role">Klær &amp; produkter</div>
+        <span class="team-tag">Produkter API</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#444">⭐</div>
+        <div class="team-name">Kvalitetsansvarlig</div>
+        <div class="team-role">Tilbakemeldinger</div>
+        <span class="team-tag">Feedback API</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#333"></div>
+        <div class="team-name">Kommunikasjonsansvarlig</div>
+        <div class="team-role">Meldinger &amp; chat</div>
+        <span class="team-tag">Chat API</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#555"></div>
+        <div class="team-name">Betalingsansvarlig</div>
+        <div class="team-role">Betaling &amp; Stripe</div>
+        <span class="team-tag">Betaling API</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#2a2a2a"></div>
+        <div class="team-name">Supportansvarlig</div>
+        <div class="team-role">Hjelp &amp; support</div>
+        <span class="team-tag">Support API</span>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:#3a3a3a"></div>
+        <div class="team-name">Brukeransvarlig</div>
+        <div class="team-role">Profiler &amp; brukere</div>
+        <span class="team-tag">Profil API</span>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="cta-section fade-in">
+    <div class="cta-box">
+      <h2>Klar til å bli en del av SkaperTorget?</h2>
+      <p>Enten du vil kjøpe noe unikt eller selge det du selv lager — vi ønsker deg velkommen.</p>
+      <div class="cta-btns">
+        <a href="Gruppe9_Skapertorget.html" class="btn-main">Se produkter</a>
+        <a href="Gruppe9_Skapertorget.html" class="btn-sec">Opprett profil</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  © 2026 SkaperTorget · <a href="Gruppe9_Skapertorget.html">Tilbake til markedsplassen</a>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
