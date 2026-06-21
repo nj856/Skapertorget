@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkaperTorget</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="stylesheet" href="skapertorget.css">
+ 
+</head>
+
+<body>
+
+<script>
+  // Kjører FØR siden vises — avgjør om vi skal vise login eller ikke
+  if (localStorage.getItem('st_innlogget') === '1') {
+    document.write('<style>#login-overlay{display:none!important}#app-content{display:block!important}</style>');
+  }
+</script>
+
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <h2>Logg inn på SkaperTorget</h2>
+    <p>Bruk demobrukeren eller BankID for å fortsette.</p>
+
+    <div class="demo-tip">
+      <b>Demobruker:</b> brukernavn <b>demo</b> · passord <b>demo123</b>
+    </div>
+
+    <div class="field">
+      <label>Brukernavn</label>
+      <input id="login-user" type="text" placeholder="demo" onkeydown="if(event.key==='Enter')loggInn()"/>
+    </div>
+    <div class="field">
+      <label>Passord</label>
+      <input id="login-pass" type="password" placeholder="demo123" onkeydown="if(event.key==='Enter')loggInn()"/>
+    </div>
+    <button class="btn btn-black btn-full" onclick="loggInn()">Logg inn</button>
+    <div class="login-error" id="login-error">Feil brukernavn eller passord.</div>
+
+    <div class="bankid-divider">eller</div>
+
+    <button class="bankid-btn" onclick="showBankID()">
+      <span class="bankid-logo"></span> Fortsett med BankID
+    </button>
+
+    
+    <div id="bankid-screen" style="display:none; margin-top:16px; text-align:center;">
+      <div style="background:#f0f4ff; border:1px solid #b0c0ee; border-radius:4px; padding:16px; margin-bottom:12px;">
+        <div style="font-size:28px; margin-bottom:8px;"></div>
+        <div style="font-weight:700; margin-bottom:4px;">BankID på mobil</div>
+        <div style="font-size:12px; color:#666;">Åpne BankID-appen på mobilen din og bekreft innloggingen.</div>
+        <div style="margin-top:12px; font-size:11px; color:#aaa; font-style:italic;">(Dette er en demo — ingen ekte BankID-funksjonalitet)</div>
+      </div>
+      <button class="btn btn-white" onclick="skjulBankid()" style="font-size:13px;">← Tilbake</button>
+    </div>
+  </div>
+</div>
+
+<div id="app-content">
+
+<div id="conn-banner">
+  Django (8100): <b id="s-django" class="conn-err">sjekker...</b>
+  &nbsp;·&nbsp; Node/Stripe (3000): <b id="s-node" class="conn-err">sjekker...</b>
+  &nbsp;·&nbsp; Help-API (8000): <b id="s-help" class="conn-err">sjekker...</b>
+</div>
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="logo" onclick="nav('forside')">
+      SkaperTorget <small>Norske skapere — norske kjøpere</small>
+    </div>
+    <div class="header-search">
+      <input id="global-search" placeholder="Søk blant klær og produkter..." onkeydown="if(event.key==='Enter')globalSearch()"/>
+      <button onclick="globalSearch()">Søk</button>
+    </div>
+    <div class="header-actions">
+      <button id="header-login-btn" onclick="nav('profil')"> <span id="header-user-label">Logg inn</span></button>
+      <button class="btn-dark" onclick="nav('produkter')">+ Legg ut annonse</button>
+    </div>
+  </div>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <button class="nav-item active" id="n-forside"   onclick="nav('forside')">Hjem</button>
+      <button class="nav-item"        id="n-produkter" onclick="nav('produkter')">Klær &amp; mote</button>
+      <button class="nav-item"        id="n-betaling"  onclick="nav('betaling')">Betaling</button>
+      <button class="nav-item"        id="n-chat"      onclick="nav('chat')">Meldinger</button>
+      <button class="nav-item"        id="n-tilbake"   onclick="nav('tilbake')">Tilbakemelding</button>
+      <button class="nav-item"        id="n-hjelp"     onclick="nav('hjelp')">Hjelp</button>
+      <button class="nav-item"        id="n-profil"    onclick="nav('profil')">Min profil</button>
+      <button class="nav-item"        id="n-kontakt"   onclick="nav('kontakt')">Kontakt oss</button>
+      <button class="nav-item"        id="n-omoss"     onclick="window.location.href='OmOss_Skapertorget.html'">Om oss</button>
+    </div>
+  </nav>
+</header>
+
+<div class="page active" id="page-forside">
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <h1>Finn det du leter etter —<br>direkte fra skaperne</h1>
+        <p>Norges markedsplass for håndlagde klær og unike produkter.</p>
+        <div class="hero-cta">
+          <button class="hero-btn hero-btn-main" onclick="nav('produkter')">Se alle annonser</button>
+          <button class="hero-btn hero-btn-sec"  onclick="nav('profil')">Bli selger</button>
+        </div>
+      </div>
+      <div class="hero-cats">
+        <div class="hero-cat" onclick="nav('produkter')"><div class="hero-cat-icon"></div>Gensere</div>
+        <div class="hero-cat" onclick="nav('produkter')"><div class="hero-cat-icon"></div>Bukser</div>
+        <div class="hero-cat" onclick="nav('produkter')"><div class="hero-cat-icon"></div>Sokker</div>
+        <div class="hero-cat" onclick="nav('produkter')"><div class="hero-cat-icon"></div>Sko</div>
+        <div class="hero-cat" onclick="nav('produkter')"><div class="hero-cat-icon"></div>Topper</div>
+      </div>
+    </div>
+  </div>
+  <div class="content-wrap">
+    <div class="section-title">Siste annonser</div>
+    <div class="section-sub">Hentes direkte fra Django API</div>
+    <div id="home-loading" class="loading-box"><div class="spinner"></div><p style="margin-top:10px">Laster...</p></div>
+    <div id="home-grid" class="prod-grid" style="display:none"></div>
+  </div>
+</div>
+
+<div class="page" id="page-produkter">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Klær &amp; mote</div>
+    <div class="sidebar-layout">
+      <div>
+        <div class="filter-bar">
+          <input id="p-search" placeholder="Søk i klær..." oninput="filterProducts()"/>
+          <select id="p-cat" onchange="filterProducts()">
+            <option value="">Alle kategorier</option>
+            <option value="genser">Gensere</option>
+            <option value="sokker">Sokker</option>
+            <option value="bukse">Bukser</option>
+                                                </select>
+          <select id="p-sort" onchange="filterProducts()">
+            <option value="">Sorter</option>
+            <option value="price-asc">Pris: lav–høy</option>
+            <option value="price-desc">Pris: høy–lav</option>
+          </select>
+        </div>
+        <div id="prod-loading" class="loading-box"><div class="spinner"></div></div>
+        <div id="prod-grid"  class="prod-grid" style="display:none"></div>
+        <div id="prod-empty" style="display:none;text-align:center;padding:40px;color:#aaa">Ingen annonser funnet</div>
+      </div>
+      <div class="card">
+        <div class="card-title">+ Legg ut klær til salgs</div>
+        <div class="field"><label>Tittel</label><input id="np-name" placeholder="Blå jeans str. 32"/></div>
+        <div class="field"><label>Kategori</label>
+          <select id="np-cat">
+            <option value="genser">Gensere</option>
+            <option value="bukse">Bukser</option>
+            <option value="sokker">Sokker</option>
+                                                </select>
+        </div>
+        <div class="field"><label>Størrelse</label><input id="np-size" placeholder="M, L, 32..."/></div>
+        <div class="field"><label>Pris (kr)</label><input id="np-price" type="number" placeholder="299"/></div>
+        <button class="btn btn-black btn-full" onclick="leggTilProdukt()">Publiser annonse</button>
+        <div class="alert" id="np-alert"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-chat">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Meldinger</div>
+    <div class="section-title">Meldinger</div>
+    <div class="section-sub">Chat-API · GET /messages?chat_id= · POST /messages/send · POST /messages/selger-svar · DELETE /messages/delete/{id}</div>
+    <div class="chat-wrap">
+      <div class="chat-box">
+        <div class="chat-header">
+           Chat med selger
+          <span class="chat-id-label">Chat: <input id="chat-id-input" value="1" onchange="loadMessages()"/></span>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <p style="color:#aaa;font-size:12px;text-align:center;margin-top:20px">Laster meldinger...</p>
+        </div>
+        <div class="chat-footer">
+          <input id="chat-input" placeholder="Skriv en melding..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+          <button onclick="sendMsg()">Send</button>
+        </div>
+        <div class="chat-footer" style="background:#f5f5f5;border-top:1px solid #ddd;">
+          <input id="selger-input" placeholder="Selger skriver..." onkeydown="if(event.key==='Enter')selgerSvar()" style="background:#f5f5f5;"/>
+          <button onclick="selgerSvar()" style="background:#555;">Svar</button>
+        </div>
+      </div>
+      <div class="api-info">
+        <b style="color:#111">Chat-API</b><br><br>
+        <code>GET /messages?chat_id={id}</code><br>
+        Henter meldinger for en chat<br><br>
+        <code>POST /messages/send</code><br>
+        Body: <code>{ message, chat_id }</code><br><br>
+        <code>POST /messages/selger-svar</code><br>
+        Selger sender melding<br><br>
+        <code>DELETE /messages/delete/{id}</code><br>
+        Sletter en melding<br><br>
+        Avsender-ID 1 = kjøper · ID 2 = selger
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-tilbake">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Tilbakemelding</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Gi tilbakemelding på en ordre</div>
+        <div class="field"><label>Hvem er du?</label>
+          <select id="t-hvem"><option value="">— velg —</option><option value="Kunde">Kunde</option><option value="Bedrift">Bedrift</option></select>
+        </div>
+        <div class="field"><label>Bestilling</label>
+          <select id="t-best"><option value="">— velg —</option><option value="Bestilling 1">Bestilling 1</option><option value="Bestilling 2">Bestilling 2</option></select>
+        </div>
+        <div class="field"><label>Produkt</label>
+          <select id="t-prod"><option value="">— velg —</option><option value="Produkt A">Produkt A</option><option value="Produkt B">Produkt B</option></select>
+        </div>
+        <div class="field"><label>Vurdering</label>
+          <select id="t-vur">
+            <option value="">— velg —</option>
+            <option value="1"> 1 — Veldig dårlig</option>
+            <option value="2"> 2 — Dårlig</option>
+            <option value="3"> 3 — OK</option>
+            <option value="4"> 4 — Bra</option>
+            <option value="5"> 5 — Utmerket</option>
+          </select>
+        </div>
+        <div class="field"><label>Din melding</label><textarea id="t-msg" placeholder="Fortell om opplevelsen..."></textarea></div>
+        <button class="btn btn-black btn-full" onclick="sendTilbake()">Send tilbakemelding</button>
+        <div class="alert" id="t-alert"></div>
+      </div>
+      <div class="api-info">
+        <b style="color:#111">Tilbakemelding-API</b><br><br>
+        <code>POST /api/tilbakemelding/</code><br><br>
+        Felter: <code>hvem_er_du</code>, <code>bestilling</code>, <code>produkt</code>, <code>vurdering</code>, <code>melding</code><br><br>
+        Django: port <b>8100</b>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-betaling">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Betaling</div>
+    <div class="payment-grid">
+      <div>
+        <div class="section-title" style="margin-bottom:4px">Produkter</div>
+        <div class="section-sub">Klær-API · GET/POST /api/clothing/</div>
+        <div id="pay-products-loading" class="loading-box" style="padding:20px"><div class="spinner"></div></div>
+        <div id="pay-products-list" style="display:none"></div>
+        <div id="pay-empty" style="display:none;color:#aaa;font-size:12px;padding:8px 0">Ingen produkter. Start Django.</div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">+ Legg til produkt</div>
+          <div class="field"><label>Navn</label><input id="pay-name" placeholder="Keramikk kopp"/></div>
+          <div class="field"><label>Pris (kr)</label><input id="pay-price" type="number" placeholder="499"/></div>
+          <button class="btn btn-white btn-full" onclick="leggTilPayProdukt()">Legg til produkt</button>
+          <div class="alert" id="pay-prod-alert"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title"> Betal trygt og enkelt</div>
+          <div class="sel-prod-box">
+            <div class="slabel">Valgt produkt</div>
+            <div class="sname" id="sel-prod-name">— klikk et produkt til venstre —</div>
+            <div class="sprice" id="sel-prod-price"></div>
+          </div>
+          <div class="field">
+            <label>Kortinformasjon (Stripe)</label>
+            <div class="stripe-mount" id="stripe-card-mount">Kortfelt lastes når siden åpnes...</div>
+          </div>
+          <button class="btn btn-black btn-full" id="betal-btn" onclick="gjennomforBetaling()">Betal nå</button>
+          <div class="alert" id="betal-alert"></div>
+          <p style="font-size:11px;color:#aaa;margin-top:10px;text-align:center"> Sikker betaling via Stripe</p>
+        </div>
+        <div class="card">
+          <div class="card-title"> Bli selger</div>
+          <p style="font-size:12px;color:#666;margin-bottom:12px">Registrer deg via Stripe Connect for å ta imot betaling.</p>
+          <div class="field"><label>E-post</label><input id="selger-epost" type="email" placeholder="deg@example.no"/></div>
+          <button class="btn btn-black btn-full" onclick="registrerSelger()">Start selger-registrering</button>
+          <div class="alert" id="selger-alert"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-hjelp">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Hjelp &amp; support</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Send en hjelpeforespørsel</div>
+        <p style="font-size:12px;color:#666;margin-bottom:14px">Hjelp-API · Help-server på port 8000</p>
+        <div class="field"><label>Tittel</label><input id="h-title" placeholder="Hva handler det om?"/></div>
+        <div class="field"><label>E-post</label><input id="h-email" type="email" placeholder="din@epost.no"/></div>
+        <div class="field"><label>Beskriv problemet</label><textarea id="h-msg" placeholder="Fortell hva som skjedde..."></textarea></div>
+        <div class="field"><label>Prioritet</label>
+          <select id="h-prio">
+            <option value="low">Lav</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">Høy</option>
+            <option value="urgent">Akutt</option>
+          </select>
+        </div>
+        <button class="btn btn-black btn-full" onclick="sendTicket()">Send forespørsel</button>
+        <div class="alert" id="h-alert"></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="section-title" style="margin:0">Dine forespørsler</div>
+          <button class="btn btn-white" style="font-size:12px;padding:6px 12px" onclick="loadTickets()">↻ Oppdater</button>
+        </div>
+        <div id="h-loading" class="loading-box" style="padding:20px"><div class="spinner"></div></div>
+        <div id="h-list" class="ticket-list" style="display:none"></div>
+        <div id="h-empty" style="display:none;color:#aaa;font-size:12px;padding:10px">Ingen forespørsler. Start Help-API på port 8000.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-profil">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Min profil</div>
+
+    
+    <div id="logget-inn-banner" style="display:none; background:#111; color:#fff; border-radius:4px; padding:14px 18px; margin-bottom:20px; display:none; align-items:center; justify-content:space-between; gap:12px;">
+      <span> Logget inn som: <b id="logget-inn-navn">—</b></span>
+      <button class="btn btn-white" style="font-size:12px;padding:6px 14px" onclick="loggUt()">Logg ut</button>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Opprett konto</div>
+          <p style="font-size:12px;color:#666;margin-bottom:14px">Profil-API · POST /api/profil/opprett/</p>
+          <div class="rolle-grid">
+            <div class="rolle-card" data-r="kunde"  onclick="velgRolle(this)"><div class="icon"></div><h4>Kjøper</h4><p>Finn og kjøp klær</p></div>
+            <div class="rolle-card" data-r="selger" onclick="velgRolle(this)"><div class="icon"></div><h4>Selger</h4><p>Legg ut dine klær</p></div>
+            <div class="rolle-card" data-r="begge"  onclick="velgRolle(this)"><div class="icon"></div><h4>Begge</h4><p>Kjøp og selg</p></div>
+          </div>
+          <div class="field"><label>Fullt navn</label><input id="pr-navn" placeholder="Ditt navn"/></div>
+          <div class="field"><label>E-postadresse</label><input id="pr-epost" type="email" placeholder="din@epost.no"/></div>
+          <div class="field"><label>Passord</label><input id="pr-passord" type="password" placeholder="Velg et passord"/></div>
+          <div class="field"><label>Bekreft passord</label><input id="pr-passord2" type="password" placeholder="Skriv passordet igjen"/></div>
+          <div class="field"><label>Om deg (valgfritt)</label><textarea id="pr-besk" placeholder="Fortell litt om deg..." style="min-height:64px"></textarea></div>
+          <button class="btn btn-black btn-full" onclick="opprettProfil()">Opprett konto</button>
+          <div class="alert" id="pr-alert"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Min profil</div>
+          <p style="font-size:12px;color:#666;margin-bottom:12px">GET /api/profil/meg/</p>
+          <div id="profil-data" style="color:#aaa;font-size:13px;margin-bottom:12px">Klikk "Hent profil" for å laste inn data.</div>
+          <button class="btn btn-white" onclick="hentProfil()">Hent profil</button>
+          <div class="alert" id="get-pr-alert"></div>
+        </div>
+        <div class="api-info">
+          <b style="color:#111">Profil-API</b><br><br>
+          <code>POST /api/profil/opprett/</code><br>
+          Felt: <code>navn</code>, <code>epost</code>, <code>beskrivelse</code>, <code>rolle</code><br><br>
+          <code>GET /api/profil/meg/</code><br>
+          Returnerer første profil i DB<br><br>
+          Django: port <b>8100</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-kontakt">
+  <div class="content-wrap">
+    <div class="navigationpath"><span onclick="nav('forside')">Hjem</span> › Kontakt oss</div>
+    <div class="section-title">Kontakt oss</div>
+    <div class="section-sub">Vi er her for å hjelpe deg</div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:20px;align-items:start;margin-top:8px;max-width:600px">
+
+      
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title"> Ta kontakt</div>
+
+          <div style="display:flex;flex-direction:column;gap:20px">
+
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="font-size:24px"></div>
+              <div>
+                <div style="font-weight:700;font-size:13px;margin-bottom:2px">E-post</div>
+                <a href="mailto:kundeservice@skapertorget.no" style="color:#111;font-size:14px;text-decoration:none;border-bottom:1px solid #ccc">kundeservice@skapertorget.no</a>
+                <div style="font-size:12px;color:#666;margin-top:3px">Vi svarer innen 1 virkedag</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="font-size:24px"></div>
+              <div>
+                <div style="font-weight:700;font-size:13px;margin-bottom:2px">Telefon</div>
+                <a href="tel:+4722334455" style="color:#111;font-size:14px;text-decoration:none;border-bottom:1px solid #ccc">+47 22 33 44 55</a>
+                <div style="font-size:12px;color:#666;margin-top:3px">Kun i åpningstiden</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;align-items:flex-start">
+              <div style="font-size:24px"></div>
+              <div>
+                <div style="font-weight:700;font-size:13px;margin-bottom:2px">Adresse</div>
+                <div style="font-size:14px">Storgata 1, 0155 Oslo</div>
+                <div style="font-size:12px;color:#666;margin-top:3px">Kun for post — ikke besøksadresse</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        
+        <div class="card">
+          <div class="card-title"> Åpningstider</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tr style="border-bottom:1px solid #eee">
+              <td style="padding:8px 0;font-weight:600">Mandag–fredag</td>
+              <td style="padding:8px 0;text-align:right;color:#111">09:00 – 16:00</td>
+            </tr>
+            <tr style="border-bottom:1px solid #eee">
+              <td style="padding:8px 0;font-weight:600">Lørdag</td>
+              <td style="padding:8px 0;text-align:right;color:#111">10:00 – 14:00</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;font-weight:600">Søndag</td>
+              <td style="padding:8px 0;text-align:right;color:#999">Stengt</td>
+            </tr>
+          </table>
+          <div style="margin-top:14px;padding:10px 12px;background:#f9f9f9;border:1px solid #eee;border-radius:4px;font-size:12px;color:#666">
+             Utenfor åpningstiden? Send oss en e-post eller bruk <span onclick="nav('hjelp')" style="color:#111;font-weight:700;cursor:pointer;text-decoration:underline">hjelpesystemet</span> — vi svarer så fort vi kan.
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<footer class="site-footer">
+  © 2026 SkaperTorget
+  &nbsp;·&nbsp; 
+  <a href="OmOss_Skapertorget.html">Om oss</a>
+</footer>
+
+</div> 
+
+  <script src="skapertorget.js"></script>
+</body>
+</html>
